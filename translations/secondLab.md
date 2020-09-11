@@ -6,8 +6,7 @@ In this lab, you will create virtual machines (VMs) and connect to them. You wil
 
 ## Objectives
 
-In this lab, the objectives are to perform the following tasks:
-    - Create a Compute Engine virtual machine using the Google Cloud Platform (GCP) Console.
+In this lab, the objectives are to perform the following tasks: - Create a Compute Engine virtual machine using the Google Cloud Platform (GCP) Console.
 
     - Create a Compute Engine virtual machine using the gcloud command-line interface.
 
@@ -28,58 +27,58 @@ If you are accessing gcloud via your local machine's CLI:
 - To set the active account:
   > gcloud config set account `ACCOUNT`
 
+## Task 2:
 
+    - Steps:
+     1. Create a virtual machine
 
-## Task 2: Create a virtual machine using the GCP Console
+        > gcloud compute instances create vm-1 -- machine-type "n1-standard-1" --image-project "debian-cloud" --image "debian-9-stretch-v28190213" --subnet "default" --tags http
 
-        > gcloud compute instances create vm-1 -- machine-type "n1-standard-1" --image-project "debian-cloud" --image "debian-9
+        > gcloud compute firewall-rules create allow-http --action=ALLOW --direction=INGRESS --rules=tcp:80 --target-tags=http
 
-#### 2. Set up a virtual environment in which you will run your application. Python virtual environments are used to isolate package installations from the system:
+     2.
 
-        > sudo apt-get install virtualenv
+        > gcloud config set copmute/zone us-central-b
 
-        If prompted [Y/n], press Y and then Enter.
+        > gcloud compute instances create vm-2 -- machine-type "n1-standard-1" --image-project "debian-cloud" --image "debian-9-stretch-v28190213" --subnet "default"
 
-        > virtualenv -p python3 venv
+     3. Connect between the two instances.
 
-#### 3. Activate the virtual environment:
+        1. Use the ping command to  confirm that vm-2 can reach vm-1 over the network:
+            - Connect vm-2:
+             > gcloud compute ssh my-vm-2
 
-        > source venv/bin/activate
+            - ping vm-1 from vm-2:
+             > ping -c 4 vm-1
 
-#### 4. Navigate to your project directory and install dependencies:
+            - Use the ssh command to open a command prompt on vm-1 from vm-2:
+             > ssh vm-1
 
-        > pip install  -r requirements.txt --project=$DEVSHELL_PROJECT_ID
+            - At the command prompt on vm-1, install the Nginx web sever:
+             > sudo apt-get install nginx-light -y
 
-#### 5. Run the application:
+            - Use nano text editor to add a custom message to the default home page of the web server:
+             > sudo nano /var/www/html/index/nginx-debian.html
 
-        > python main.py
+            - Use the arrow keys to move the cursor to the line just below the h1 header. Add text like this, and replace YOUR_NAME with your name:
+             > Hi from YOUR_NAME
 
-## Task 3: Deploy and run Hello World on App Engine
+            - Exit the editor:
+               Press Ctrl+O and then press Enter to save your edited file, and then press Ctrl+X to exit the nano text editor.
 
-In this task, you run the Hello World application.
+            - Confirm that the web server is serving your new page, at the command prompt on vm-1
+             > curl http://localhost/
+             The response will be the HTML source of the web server's home page, including your line of custom text.
 
-### Steps:
+            - Exit cmd:
+             > exit
 
-#### 1. Navigate to the source directory:
+            - Confirm that vm-2 can reach web server on vm-1 at the cmd on vm-2:
+             > curl http://my-vm-1/
+             The response will again be the HTML source of the web server's home page, including your line of custom text.
 
-        > cd ~/python-docs-samples/appengine/standard_python3/hello_world
+     4. Get the external IP of the vm-1 instance:
+      > gcloud compute instances list --zone us-central-a
 
-#### 2. Deploy your Hello World application:
-
-        > gcloud app deploy
-
-        If prompted [Y/n], press Y and then Enter.
-
-#### 3. Launch your browser to view the app at http://YOUR_PROJECT_ID.appspot.com:
-
-        > gcloud app browse
-
-        Ctrl+click to open the URL a browser window, you should see `Hello World`.
-
-## Task 4: Deploy and run Hello World on App Engine
-
-App Engine offers no option to Undeploy an application. After an application is deployed, it remains deployed, although you could instead replace the application with a simple page that says something like "not in service."
-
-However, you can disable the application, which causes it to no longer be accessible to users.
-
-    > gcloud app versions list --filter=hello_world DISABLE
+     5. Paste it into the address bar of a new browser tab and press enter.
+        the result should be your web server's home page, including your custom text
